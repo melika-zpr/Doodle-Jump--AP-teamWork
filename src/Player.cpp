@@ -9,6 +9,10 @@ Player::Player(sf::Texture &textureLeft, sf::Texture &textureRight)
     // تنظیم تصویر اولیه (مثلاً رو به راست)
     sprite.setTexture(*texRight);
 
+    // --- اضافه شدن تغییر سایز کاراکتر ---
+    // این خط سایز عکس را به 60% اندازه واقعی‌اش کاهش می‌دهد
+    sprite.setScale(0.6f, 0.6f);
+
     // مرکز تصویر را برای دقیق‌تر شدن پیچش صفحه وسط در نظر می‌گیریم
     sf::FloatRect bounds = sprite.getLocalBounds();
     sprite.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
