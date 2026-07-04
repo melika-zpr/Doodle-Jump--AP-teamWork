@@ -19,6 +19,9 @@ private:
     // اضافه شدن کلاس مدیریت دنیای بازی
     std::unique_ptr<WorldManager> worldManager;
 
+    // متغیر جدید برای اسپرایت پس‌زمینه
+    sf::Sprite backgroundSprite;
+
     void processEvents();
     void update(float deltaTime);
     void render();

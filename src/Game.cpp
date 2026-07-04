@@ -7,6 +7,10 @@ Game::Game() : window(sf::VideoMode(500, 800), "Doodle Jump - Phase 1", sf::Styl
 
     try
     {
+        // لود کردن پس زمینه (نام فایل را با عکس خودتان تطابق دهید)
+        textureManager.load("background", "assets/background.png");
+        backgroundSprite.setTexture(textureManager.get("background"));
+
         // توجه: نام فایل در مسیر زیر باید با نام عکس شما در پوشه assets یکی باشد
         sf::Texture &texLeft = textureManager.load("player_left", "assets/left_doodle.png");
         sf::Texture &texRight = textureManager.load("player_right", "assets/right_doodle.png");
@@ -67,8 +71,10 @@ void Game::update(float deltaTime)
 
 void Game::render()
 {
-    // تغییر رنگ پس‌زمینه به خاکستری روشن برای دیده شدن بهتر کاراکتر
-    window.clear(sf::Color(240, 240, 240));
+    window.clear();
+
+    // ۱. ابتدا پس‌زمینه رسم می‌شود تا زیر همه چیز قرار بگیرد
+    window.draw(backgroundSprite);
 
     // رسم سکوها
     if (worldManager)
