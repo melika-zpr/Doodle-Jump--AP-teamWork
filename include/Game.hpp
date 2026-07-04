@@ -13,6 +13,7 @@ private:
     sf::Clock clock;
 
     ResourceManager<sf::Texture> textureManager;
+
     // استفاده از unique_ptr برای مدیریت هوشمند حافظه و جلوگیری از نشت حافظه
     std::unique_ptr<Player> player;
 
