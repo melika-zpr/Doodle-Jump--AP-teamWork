@@ -1,0 +1,77 @@
+# =====================
+# OS Detection & Settings
+# =====================
+ifeq ($(OS),Windows_NT)
+    # --- تنظیمات ویندوز ---
+    # اجبار به استفاده از CMD ویندوز برای جلوگیری از تداخل با Git Bash
+    SHELL = cmd.exe
+    CXX = g++
+    SFML_DIR = SFML
+    INCFLAGS = -Iinclude -I$(SFML_DIR)/include
+    LDFLAGS = -L$(SFML_DIR)/lib
+    LIBFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
+    EXE_EXT = .exe
+    
+    # دستورات ساخت پوشه (بدون ارور در صورت وجود داشتن)
+    MKDIR_BUILD = -mkdir "build" 2>nul || type nul
+    MKDIR_RELEASE = -mkdir "bin\release" 2>nul || type nul
+    MKDIR_DEBUG = -mkdir "bin\debug" 2>nul || type nul
+    RM_CMD = -rmdir /s /q "build" "bin" 2>nul || type nul
+else
+    # --- تنظیمات مک / لینوکس ---
+    CXX = c++
+    SFML_CFLAGS = $(shell pkg-config --cflags sfml-graphics sfml-window sfml-system)
+    SFML_LIBS   = $(shell pkg-config --libs sfml-graphics sfml-window sfml-system)
+    
+    INCFLAGS = -Iinclude $(SFML_CFLAGS)
+    LDFLAGS = 
+    LIBFLAGS = $(SFML_LIBS)
+    EXE_EXT = 
+    
+    MKDIR_BUILD = mkdir -p build
+    MKDIR_RELEASE = mkdir -p bin/release
+    MKDIR_DEBUG = mkdir -p bin/debug
+    RM_CMD = rm -rf build bin
+endif
+
+# =====================
+# Files & General Flags
+# =====================
+CXXFLAGS = -std=c++17 -Wall -MMD -MP
+SRC = $(wildcard src/*.cpp)
+OBJ = $(patsubst src/%.cpp,build/%.o,$(SRC))
+DEP = $(patsubst src/%.cpp,build/%.d,$(SRC))
+
+RELEASE = bin/release/game$(EXE_EXT)
+DEBUG = bin/debug/game_debug$(EXE_EXT)
+
+# =====================
+# Make Rules
+# =====================
+all: release
+
+release: $(RELEASE)
+
+debug: $(DEBUG)
+
+build/%.o: src/%.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $(CXXFLAGS) $(INCFLAGS) -c $< -o $@
+
+-include $(DEP)
+
+$(RELEASE): $(OBJ)
+	@$(MKDIR_RELEASE)
+	$(CXX) $(CXXFLAGS) -O2 -DNDEBUG $^ -o $@ $(LDFLAGS) $(LIBFLAGS)
+
+$(DEBUG): $(OBJ)
+	@$(MKDIR_DEBUG)
+	$(CXX) $(CXXFLAGS) -g $^ -o $@ $(LDFLAGS) $(LIBFLAGS)
+
+run: release
+	./$(RELEASE)
+
+clean:
+	@$(RM_CMD)
+
+.PHONY: all release debug run clean
