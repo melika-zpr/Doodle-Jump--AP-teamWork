@@ -1,0 +1,70 @@
+#include "Game.hpp"
+#include <iostream>
+
+Game::Game() : window(sf::VideoMode(500, 800), "Doodle Jump - Phase 1", sf::Style::Titlebar | sf::Style::Close)
+{
+    window.setFramerateLimit(60);
+
+    try
+    {
+        // توجه: نام فایل در مسیر زیر باید با نام عکس شما در پوشه assets یکی باشد
+        sf::Texture &texLeft = textureManager.load("player_left", "assets/left_doodle.png");
+        sf::Texture &texRight = textureManager.load("player_right", "assets/right_doodle.png");
+
+        player = std::make_unique<Player>(texLeft, texRight);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Initialization Error: " << e.what() << std::endl;
+    }
+}
+
+void Game::run()
+{
+    while (window.isOpen())
+    {
+        float deltaTime = clock.restart().asSeconds();
+        processEvents();
+        update(deltaTime);
+        render();
+    }
+}
+
+void Game::processEvents()
+{
+    sf::Event event;
+    while (window.pollEvent(event))
+    {
+        if (event.type == sf::Event::Closed)
+        {
+            window.close();
+        }
+    }
+
+    if (player)
+    {
+        player->handleInput();
+    }
+}
+
+void Game::update(float deltaTime)
+{
+    if (player)
+    {
+        // ارسال عدد ۵۰۰ (عرض صفحه) برای اجرای منطق پیچش صفحه
+        player->update(deltaTime, 500.f);
+    }
+}
+
+void Game::render()
+{
+    // تغییر رنگ پس‌زمینه به خاکستری روشن برای دیده شدن بهتر کاراکتر
+    window.clear(sf::Color(240, 240, 240));
+
+    if (player)
+    {
+        player->draw(window);
+    }
+
+    window.display();
+}

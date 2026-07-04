@@ -16,7 +16,9 @@ ifeq ($(OS),Windows_NT)
     MKDIR_BUILD = -mkdir "build" 2>nul || type nul
     MKDIR_RELEASE = -mkdir "bin\release" 2>nul || type nul
     MKDIR_DEBUG = -mkdir "bin\debug" 2>nul || type nul
-    RM_CMD = -rmdir /s /q "build" "bin" 2>nul || type nul
+
+    # تغییر مهم: فقط فایل‌های اجرایی پاک می‌شوند و DLLها دست‌نخورده می‌مانند
+    RM_CMD = -rmdir /s /q "build" 2>nul & del /q "bin\release\*.exe" 2>nul & del /q "bin\debug\*.exe" 2>nul || type nul
 else
     # --- تنظیمات مک / لینوکس ---
     CXX = c++
@@ -31,7 +33,9 @@ else
     MKDIR_BUILD = mkdir -p build
     MKDIR_RELEASE = mkdir -p bin/release
     MKDIR_DEBUG = mkdir -p bin/debug
-    RM_CMD = rm -rf build bin
+
+    # تغییر مهم برای سیستم مک هم‌گروهی‌تان
+    RM_CMD = rm -rf build bin/release/game bin/debug/game_debug
 endif
 
 # =====================
