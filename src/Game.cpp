@@ -11,7 +11,13 @@ Game::Game() : window(sf::VideoMode(500, 800), "Doodle Jump - Phase 1", sf::Styl
         sf::Texture &texLeft = textureManager.load("player_left", "assets/left_doodle.png");
         sf::Texture &texRight = textureManager.load("player_right", "assets/right_doodle.png");
 
+        // عکس سکو باید قبل از ساختن WorldManager لود شود
+        textureManager.load("platform", "assets/normal_platform.png");
+
         player = std::make_unique<Player>(texLeft, texRight);
+
+        // ساختن مدیر دنیای بازی و پاس دادن منابع به آن
+        worldManager = std::make_unique<WorldManager>(textureManager);
     }
     catch (const std::exception &e)
     {
@@ -49,10 +55,13 @@ void Game::processEvents()
 
 void Game::update(float deltaTime)
 {
-    if (player)
+    if (player && worldManager)
     {
-        // ارسال عدد ۵۰۰ (عرض صفحه) برای اجرای منطق پیچش صفحه
+        // آپدیت فیزیک بازیکن
         player->update(deltaTime, 500.f);
+
+        // آپدیت برخوردها و دوربین با پاس دادن بازیکن به دنیای بازی
+        worldManager->update(*player);
     }
 }
 
@@ -61,6 +70,13 @@ void Game::render()
     // تغییر رنگ پس‌زمینه به خاکستری روشن برای دیده شدن بهتر کاراکتر
     window.clear(sf::Color(240, 240, 240));
 
+    // رسم سکوها
+    if (worldManager)
+    {
+        worldManager->draw(window);
+    }
+
+    // رسم بازیکن (همیشه بعد از سکوها رسم می‌شود تا روی آن‌ها قرار بگیرد)
     if (player)
     {
         player->draw(window);
