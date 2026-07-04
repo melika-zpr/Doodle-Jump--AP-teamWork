@@ -33,6 +33,8 @@ public:
     void setVelocity(sf::Vector2f vel);
     sf::FloatRect getBounds() const;
     int getScore() const;
+
+    void setPosition(sf::Vector2f pos);
 };
 
 #endif
