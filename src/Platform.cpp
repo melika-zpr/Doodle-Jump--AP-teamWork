@@ -1,16 +1,41 @@
 #include "Platform.hpp"
 
-Platform::Platform(sf::Texture& texture, sf::Vector2f pos) {
+Platform::Platform(sf::Texture& texture, sf::Vector2f pos, PlatformType platformType)
+    : position(pos), type(platformType), active(true), moveSpeed(0.f), moveDirection(1)
+{
     sprite.setTexture(texture);
-    position = pos;
+    sprite.setPosition(position);
+    if (type == PlatformType::Moving) {
+        moveSpeed = 80.f;
+    }
+}
+
+void Platform::update(float deltaTime, float windowWidth) {
+    if (!active || type != PlatformType::Moving) {
+        return;
+    }
+
+    position.x += moveSpeed * static_cast<float>(moveDirection) * deltaTime;
+    if (position.x < 0.f) {
+        position.x = 0.f;
+        moveDirection = 1;
+    } else if (position.x + sprite.getGlobalBounds().width > windowWidth) {
+        position.x = windowWidth - sprite.getGlobalBounds().width;
+        moveDirection = -1;
+    }
     sprite.setPosition(position);
 }
 
 void Platform::draw(sf::RenderWindow& window) {
-    window.draw(sprite);
+    if (active) {
+        window.draw(sprite);
+    }
 }
 
 sf::FloatRect Platform::getBounds() const {
+    if (!active) {
+        return sf::FloatRect();
+    }
     return sprite.getGlobalBounds();
 }
 
@@ -21,4 +46,28 @@ sf::Vector2f Platform::getPosition() const {
 void Platform::setPosition(sf::Vector2f pos) {
     position = pos;
     sprite.setPosition(position);
+}
+
+void Platform::reset(sf::Texture& texture, PlatformType newType, sf::Vector2f pos) {
+    type = newType;
+    active = true;
+    position = pos;
+    sprite.setTexture(texture);
+    sprite.setPosition(position);
+    moveDirection = 1;
+    moveSpeed = (type == PlatformType::Moving) ? 80.f : 0.f;
+}
+
+bool Platform::isActive() const {
+    return active;
+}
+
+void Platform::breakPlatform() {
+    if (type == PlatformType::Broken) {
+        active = false;
+    }
+}
+
+Platform::PlatformType Platform::getType() const {
+    return type;
 }

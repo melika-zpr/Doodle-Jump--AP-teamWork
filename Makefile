@@ -22,8 +22,14 @@ ifeq ($(OS),Windows_NT)
 else
     # --- تنظیمات مک / لینوکس ---
     CXX = c++
-    SFML_CFLAGS = $(shell pkg-config --cflags sfml-graphics sfml-window sfml-system)
-    SFML_LIBS   = $(shell pkg-config --libs sfml-graphics sfml-window sfml-system)
+    SFML_PKG_CONFIG_PATH =
+    ifneq ($(wildcard /opt/homebrew/opt/sfml@2/lib/pkgconfig),)
+        SFML_PKG_CONFIG_PATH = /opt/homebrew/opt/sfml@2/lib/pkgconfig
+    else ifneq ($(wildcard /usr/local/opt/sfml@2/lib/pkgconfig),)
+        SFML_PKG_CONFIG_PATH = /usr/local/opt/sfml@2/lib/pkgconfig
+    endif
+    SFML_CFLAGS = $(shell PKG_CONFIG_PATH="$(SFML_PKG_CONFIG_PATH)" pkg-config --cflags sfml-graphics sfml-window sfml-system 2>/dev/null)
+    SFML_LIBS   = $(shell PKG_CONFIG_PATH="$(SFML_PKG_CONFIG_PATH)" pkg-config --libs sfml-graphics sfml-window sfml-system 2>/dev/null)
     
     INCFLAGS = -Iinclude $(SFML_CFLAGS)
     LDFLAGS = 
@@ -41,7 +47,7 @@ endif
 # =====================
 # Files & General Flags
 # =====================
-CXXFLAGS = -std=c++17 -Wall -MMD -MP
+CXXFLAGS = -std=c++17 -Wall -Wno-deprecated-declarations -MMD -MP
 SRC = $(wildcard src/*.cpp)
 OBJ = $(patsubst src/%.cpp,build/%.o,$(SRC))
 DEP = $(patsubst src/%.cpp,build/%.d,$(SRC))

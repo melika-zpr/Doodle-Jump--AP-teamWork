@@ -20,7 +20,7 @@ public:
     void spawnInitialPlatforms();
     
     // بازیکن به عنوان ورودی داده می‌شود تا برخوردها و دوربین محاسبه شود
-    void update(Player& player); 
+    float update(Player& player);
     
     void draw(sf::RenderWindow& window);
 };
