@@ -3,29 +3,62 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <string>
 #include "ResourceManager.hpp"
 #include "Player.hpp"
 #include "WorldManager.hpp"
 
 class Game {
 private:
+    enum class GameState {
+        Menu,
+        Playing,
+        GameOver
+    };
+
     sf::RenderWindow window;
     sf::Clock clock;
 
     ResourceManager<sf::Texture> textureManager;
 
-    // استفاده از unique_ptr برای مدیریت هوشمند حافظه و جلوگیری از نشت حافظه
     std::unique_ptr<Player> player;
-
-    // اضافه شدن کلاس مدیریت دنیای بازی
     std::unique_ptr<WorldManager> worldManager;
 
-    // متغیر جدید برای اسپرایت پس‌زمینه
     sf::Sprite backgroundSprite;
+    sf::Font font;
+    sf::Text titleText;
+    sf::Text subtitleText;
+    sf::Text actionText;
+    sf::Text restartText;
+    sf::Text menuText;
+    sf::Text scoreText;
+    sf::Text highScoreText;
+    sf::Text menuHighScoreText;
+    sf::Text instructionText;
+    sf::Text gameOverText;
 
-    void processEvents();
-    void update(float deltaTime);
-    void render();
+    sf::RectangleShape startButton;  // Texture button for starting the game
+    sf::RectangleShape restartButton;  // Texture button for restarting after game over
+    sf::RectangleShape menuButton;  // Texture button for returning to the main menu
+
+    int score;  // Current score in the active game session
+    int highScore;  // Stored best score across launches
+    static constexpr const char* highScoreFilename = "highscore.txt";  // File where high score is persisted
+
+    GameState gameState;  // Current screen state: Menu, Playing, or GameOver
+
+    void processEvents();  // Read window events and player input
+    void update(float deltaTime);  // Advance game state and handle scrolling
+    void render();  // Draw the current frame
+
+    void setupUi();  // Load fonts, configure text, and prepare buttons
+    void updateOverlayTexts();  // Refresh HUD text strings after score changes
+    void startGame();  // Switch into Playing state and reset game objects
+    void resetGame();  // Reset player, world, and score for a new game
+    void handleButtonClick(const sf::Vector2i &mousePosition);  // Manage menu button clicks
+    void drawOverlay();  // Draw menu/game UI on top of the game world
+    void loadHighScore();  // Load saved high score from disk
+    void saveHighScore() const;  // Save current high score to disk
 
 public:
     Game();
