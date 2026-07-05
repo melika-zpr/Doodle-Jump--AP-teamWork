@@ -6,12 +6,13 @@ Platform::Platform(sf::Texture& texture, sf::Vector2f pos, PlatformType platform
     sprite.setTexture(texture);
     sprite.setPosition(position);
     if (type == PlatformType::Moving) {
-        moveSpeed = 80.f;
+        moveSpeed = 80.f; // Moving platforms slide horizontally.
     }
 }
 
 void Platform::update(float deltaTime, float windowWidth) {
     if (type == PlatformType::Moving && active) {
+        // Move the platform left or right, reversing at screen edges.
         position.x += moveSpeed * static_cast<float>(moveDirection) * deltaTime;
         if (position.x < 0.f) {
             position.x = 0.f;
@@ -23,6 +24,7 @@ void Platform::update(float deltaTime, float windowWidth) {
     }
 
     if (falling) {
+        // Broken platforms fall after the player lands on them.
         position.y += fallSpeed * deltaTime;
         if (position.y > 900.f) {
             active = false;
@@ -34,6 +36,7 @@ void Platform::update(float deltaTime, float windowWidth) {
 }
 
 void Platform::draw(sf::RenderWindow& window) {
+    // Only draw the platform while it is active or still falling.
     if (active || falling) {
         window.draw(sprite);
     }

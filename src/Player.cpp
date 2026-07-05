@@ -2,63 +2,62 @@
 
 Player::Player(sf::Texture &textureLeft, sf::Texture &textureRight)
 {
-    // ذخیره آدرس تکستچرها
+    // Store texture references for left and right facing sprites.
     texLeft = &textureLeft;
     texRight = &textureRight;
 
-    // تنظیم تصویر اولیه (مثلاً رو به راست)
+    // Start with the right-facing texture by default.
     sprite.setTexture(*texRight);
 
-    // --- اضافه شدن تغییر سایز کاراکتر ---
-    // این خط سایز عکس را به 60% اندازه واقعی‌اش کاهش می‌دهد
+    // Scale the player sprite down to fit the game world.
     sprite.setScale(0.6f, 0.6f);
 
-    // مرکز تصویر را برای دقیق‌تر شدن پیچش صفحه وسط در نظر می‌گیریم
+    // Center the sprite origin for more accurate movement and collision.
     sf::FloatRect bounds = sprite.getLocalBounds();
     sprite.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
 
-    // موقعیت اولیه
+    // Initial spawn position and zero velocity.
     position = sf::Vector2f(250.f, 400.f);
     velocity = sf::Vector2f(0.f, 0.f);
 
     score = 0;
-    movementSpeed = 400.f; // سرعت حرکت افقی
-    gravity = 900.f;       // شتاب گرانش رو به پایین
-    jumpForce = -650.f;    // نیروی پرش اولیه رو به بالا (منفی)
+    movementSpeed = 400.f; // Horizontal movement speed.
+    gravity = 900.f;       // Downward acceleration.
+    jumpForce = -650.f;    // Upward jump velocity.
 
     sprite.setPosition(position);
 }
 
 void Player::handleInput()
 {
-    // سرعت افقی صفر می‌شود تا اگر دکمه‌ای زده نشد، کاراکتر بایستد
+    // Reset horizontal movement before checking keys.
     velocity.x = 0.f;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
     {
         velocity.x = -movementSpeed;
-        sprite.setTexture(*texLeft); // تغییر تصویر به سمت چپ
+        sprite.setTexture(*texLeft); // Switch sprite to left-facing texture.
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     {
         velocity.x = movementSpeed;
-        sprite.setTexture(*texRight); // تغییر تصویر به سمت راست
+        sprite.setTexture(*texRight); // Switch sprite to right-facing texture.
     }
 
-    // پرش دستی برای تست (بعداً حذف می‌شود و به برخورد با سکوها متصل می‌شود)
+    // Manual jump input is disabled because jumps happen on platform collision.
     // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && velocity.y > 0.f) {
-    //  jump();
-    //}
+    //     jump();
+    // }
 }
 
 void Player::update(float deltaTime, float windowWidth)
 {
-    // اعمال گرانش و سرعت
+    // Apply gravity and update position using current velocity.
     velocity.y += gravity * deltaTime;
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
 
-    // پیچش صفحه (Screen Wrap)
+    // Wrap the player horizontally when moving off-screen.
     if (position.x < 0.f)
     {
         position.x = windowWidth;

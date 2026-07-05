@@ -11,6 +11,7 @@ Game::Game()
 
     try
     {
+        // Load the stored high score first so the menu displays the correct value.
         loadHighScore();
 
         textureManager.load("background", "assets/background.png");
@@ -36,6 +37,7 @@ Game::Game()
 
 void Game::run()
 {
+    // Main game loop: handle events, update state, and render continuously.
     while (window.isOpen())
     {
         float deltaTime = clock.restart().asSeconds();
@@ -210,19 +212,23 @@ void Game::update(float deltaTime)
         return;
     }
 
+    // Update player physics and world scrolling.
     player->update(deltaTime, 500.f);
     float scrollAmount = worldManager->update(*player, deltaTime);
+
+    // Increase score only when the world scrolls upward.
     if (scrollAmount > 0.f)
     {
         score += static_cast<int>(scrollAmount);
         if (score > highScore)
         {
             highScore = score;
-            saveHighScore();
+            saveHighScore();  // Persist new record immediately.
         }
         updateOverlayTexts();
     }
 
+    // End the game if the player falls too far below the screen.
     if (player->getPosition().y > 900.f)
     {
         gameState = GameState::GameOver;

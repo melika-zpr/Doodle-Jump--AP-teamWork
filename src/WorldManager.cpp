@@ -6,10 +6,12 @@
 
 WorldManager::WorldManager(ResourceManager<sf::Texture>& texMgr)
     : textureManager(texMgr), gen(std::random_device{}()), lastPlatformX(200.f), lastPlatformType(Platform::PlatformType::Normal) {
+    // Initialize the world with safe starting platform positions.
     spawnInitialPlatforms();
 }
 
 static sf::Texture& getTextureForType(ResourceManager<sf::Texture>& manager, Platform::PlatformType type) {
+    // Select the correct platform texture based on platform type.
     switch (type) {
         case Platform::PlatformType::Broken:
             return manager.get("platform_broken");
@@ -21,6 +23,7 @@ static sf::Texture& getTextureForType(ResourceManager<sf::Texture>& manager, Pla
 }
 
 static Platform::PlatformType choosePlatformType(std::mt19937 &gen, Platform::PlatformType previousType) {
+    // Randomly choose a platform type while avoiding two broken platforms in a row.
     std::uniform_int_distribution<int> typeDist(0, 4);
     int draw = typeDist(gen);
     Platform::PlatformType type;
@@ -39,12 +42,14 @@ static Platform::PlatformType choosePlatformType(std::mt19937 &gen, Platform::Pl
 }
 
 static float chooseNextPlatformX(float previousX, std::mt19937 &gen, float minX, float maxX) {
+    // Choose the next platform X position relative to the previous one.
     std::uniform_real_distribution<float> offset(-60.f, 60.f);
     float nextX = previousX + offset(gen);
     return std::clamp(nextX, minX, maxX);
 }
 
 void WorldManager::spawnInitialPlatforms() {
+    // Create the first platform under the player, then add more above it.
     auto &normalTex = textureManager.get("platform");
     platforms.push_back(Platform(normalTex, sf::Vector2f(200.f, 750.f), Platform::PlatformType::Normal));
 
@@ -79,6 +84,7 @@ void WorldManager::spawnInitialPlatforms() {
 }
 
 float WorldManager::update(Player& player, float deltaTime) {
+    // Handle player-platform collision only when the player is falling downward.
     if (player.getVelocity().y > 0.f) {
         sf::FloatRect playerBounds = player.getBounds();
         float playerBottom = playerBounds.top + playerBounds.height;
@@ -104,6 +110,7 @@ float WorldManager::update(Player& player, float deltaTime) {
 
     float scrollAmount = 0.f;
     if (player.getPosition().y < 400.f) {
+        // Scroll the level up when the player reaches the upper region.
         float diff = 400.f - player.getPosition().y;
         scrollAmount = diff;
 
@@ -122,6 +129,7 @@ float WorldManager::update(Player& player, float deltaTime) {
             plat.update(deltaTime, 500.f);
         }
 
+        // Recycle platforms that fall below the bottom of the screen.
         for (auto& plat : platforms) {
             if (plat.getPosition().y > 800.f) {
                 float newY;
@@ -143,6 +151,7 @@ float WorldManager::update(Player& player, float deltaTime) {
             }
         }
     } else {
+        // Update all platforms when the player is not triggering level scroll.
         for (auto& plat : platforms) {
             plat.update(deltaTime, 500.f);
         }
