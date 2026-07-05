@@ -37,10 +37,11 @@ void WorldManager::spawnInitialPlatforms() {
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> disX(0.f, 400.f);
-    std::uniform_real_distribution<float> disY(70.f, 150.f);
+    std::uniform_real_distribution<float> disXOffset(-180.f, 180.f);
+    std::uniform_real_distribution<float> disY(70.f, 120.f);
 
     float currentY = 750.f;
+    float currentX = 200.f;
     std::vector<float> occupiedYs;
     occupiedYs.push_back(currentY);
 
@@ -55,9 +56,13 @@ void WorldManager::spawnInitialPlatforms() {
         currentY = nextY;
         occupiedYs.push_back(currentY);
 
+        float nextX = currentX + disXOffset(gen);
+        nextX = std::clamp(nextX, 0.f, 500.f - 100.f);
+        currentX = nextX;
+
         Platform::PlatformType type = getRandomPlatformType(gen);
         sf::Texture &texture = getTextureForType(textureManager, type);
-        platforms.push_back(Platform(texture, sf::Vector2f(disX(gen), currentY), type));
+        platforms.push_back(Platform(texture, sf::Vector2f(nextX, currentY), type));
     }
 }
 
