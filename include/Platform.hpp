@@ -14,7 +14,11 @@ public:
 private:
     sf::Sprite sprite;
     sf::Sprite springSprite;
+    sf::Sprite brokenLeftSprite;
+    sf::Sprite brokenRightSprite;
     sf::Vector2f position;
+    sf::Vector2f brokenLeftPosition;
+    sf::Vector2f brokenRightPosition;
     PlatformType type;
     bool active;
     bool falling;
