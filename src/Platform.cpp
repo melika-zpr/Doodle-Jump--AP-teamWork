@@ -6,6 +6,7 @@ const int SpringCompressedHeight = 17;
 const int SpringOpenY = 17;
 const int SpringOpenHeight = 35;
 const float SpringOpenDuration = 0.18f;
+const float SpringScale = 1.f;
 const float BrokenPieceFallSpeed = 260.f;
 const float BrokenPieceSideSpeed = 45.f;
 const float BrokenPieceRotationSpeed = 120.f;
@@ -58,7 +59,7 @@ Platform::Platform(sf::Texture& texture, sf::Vector2f pos, PlatformType platform
     if (hasSpring && springTexture) {
         springSprite.setTexture(*springTexture);
         setSpringCompressed(springSprite);
-        springSprite.setScale(0.5f, 0.5f);
+        springSprite.setScale(SpringScale, SpringScale);
         positionSpring(springSprite, sprite, position);
     } else {
         hasSpring = false;
@@ -169,7 +170,7 @@ void Platform::reset(sf::Texture& texture, PlatformType newType, sf::Vector2f po
     if (hasSpring && springTexture) {
         springSprite.setTexture(*springTexture);
         setSpringCompressed(springSprite);
-        springSprite.setScale(0.5f, 0.5f);
+        springSprite.setScale(SpringScale, SpringScale);
         positionSpring(springSprite, sprite, position);
     } else {
         hasSpring = false;
