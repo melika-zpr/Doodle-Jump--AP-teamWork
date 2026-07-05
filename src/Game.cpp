@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include <fstream>
 #include <iostream>
 #include <vector>
 
@@ -10,6 +11,8 @@ Game::Game()
 
     try
     {
+        loadHighScore();
+
         textureManager.load("background", "assets/background.png");
         backgroundSprite.setTexture(textureManager.get("background"));
 
@@ -215,6 +218,7 @@ void Game::update(float deltaTime)
         if (score > highScore)
         {
             highScore = score;
+            saveHighScore();
         }
         updateOverlayTexts();
     }
@@ -223,6 +227,36 @@ void Game::update(float deltaTime)
     {
         gameState = GameState::GameOver;
     }
+}
+
+void Game::loadHighScore()
+{
+    highScore = 0;
+    std::ifstream file(highScoreFilename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    int storedScore;
+    if (file >> storedScore)
+    {
+        if (storedScore > 0)
+        {
+            highScore = storedScore;
+        }
+    }
+}
+
+void Game::saveHighScore() const
+{
+    std::ofstream file(highScoreFilename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    file << highScore;
 }
 
 void Game::drawOverlay()

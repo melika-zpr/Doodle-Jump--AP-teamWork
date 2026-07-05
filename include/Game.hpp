@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <string>
 #include "ResourceManager.hpp"
 #include "Player.hpp"
 #include "WorldManager.hpp"
@@ -42,6 +43,7 @@ private:
 
     int score;
     int highScore;
+    static constexpr const char* highScoreFilename = "highscore.txt";
 
     GameState gameState;
 
@@ -55,6 +57,8 @@ private:
     void resetGame();
     void handleButtonClick(const sf::Vector2i &mousePosition);
     void drawOverlay();
+    void loadHighScore();
+    void saveHighScore() const;
 
 public:
     Game();

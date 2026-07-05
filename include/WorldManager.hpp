@@ -2,6 +2,7 @@
 #define WORLDMANAGER_HPP
 
 #include <SFML/Graphics.hpp>
+#include <random>
 #include <vector>
 #include "Platform.hpp"
 #include "Player.hpp"
@@ -13,6 +14,9 @@ private:
     
     // ارجاع به مدیر منابع برای دسترسی به عکس سکوها
     ResourceManager<sf::Texture>& textureManager;
+    std::mt19937 gen;
+    float lastPlatformX;
+    Platform::PlatformType lastPlatformType;
 
 public:
     WorldManager(ResourceManager<sf::Texture>& texMgr);

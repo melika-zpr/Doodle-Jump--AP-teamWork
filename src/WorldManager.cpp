@@ -2,22 +2,11 @@
 #include <random>
 #include <limits>
 #include <vector>
+#include <algorithm>
 
 WorldManager::WorldManager(ResourceManager<sf::Texture>& texMgr)
-    : textureManager(texMgr) {
+    : textureManager(texMgr), gen(std::random_device{}()), lastPlatformX(200.f), lastPlatformType(Platform::PlatformType::Normal) {
     spawnInitialPlatforms();
-}
-
-static Platform::PlatformType getRandomPlatformType(std::mt19937 &gen) {
-    std::uniform_int_distribution<int> typeDist(0, 4);
-    int draw = typeDist(gen);
-    if (draw == 0) {
-        return Platform::PlatformType::Broken;
-    }
-    if (draw == 1) {
-        return Platform::PlatformType::Moving;
-    }
-    return Platform::PlatformType::Normal;
 }
 
 static sf::Texture& getTextureForType(ResourceManager<sf::Texture>& manager, Platform::PlatformType type) {
@@ -31,17 +20,39 @@ static sf::Texture& getTextureForType(ResourceManager<sf::Texture>& manager, Pla
     }
 }
 
+static Platform::PlatformType choosePlatformType(std::mt19937 &gen, Platform::PlatformType previousType) {
+    std::uniform_int_distribution<int> typeDist(0, 4);
+    int draw = typeDist(gen);
+    Platform::PlatformType type;
+    if (draw == 0) {
+        type = Platform::PlatformType::Broken;
+    } else if (draw == 1) {
+        type = Platform::PlatformType::Moving;
+    } else {
+        type = Platform::PlatformType::Normal;
+    }
+
+    if (previousType == Platform::PlatformType::Broken && type == Platform::PlatformType::Broken) {
+        type = Platform::PlatformType::Normal;
+    }
+    return type;
+}
+
+static float chooseNextPlatformX(float previousX, std::mt19937 &gen, float minX, float maxX) {
+    std::uniform_real_distribution<float> offset(-60.f, 60.f);
+    float nextX = previousX + offset(gen);
+    return std::clamp(nextX, minX, maxX);
+}
+
 void WorldManager::spawnInitialPlatforms() {
     auto &normalTex = textureManager.get("platform");
     platforms.push_back(Platform(normalTex, sf::Vector2f(200.f, 750.f), Platform::PlatformType::Normal));
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> disXOffset(-180.f, 180.f);
-    std::uniform_real_distribution<float> disY(70.f, 120.f);
+    std::uniform_real_distribution<float> disXOffset(-80.f, 80.f);
+    std::uniform_real_distribution<float> disY(70.f, 95.f);
 
     float currentY = 750.f;
-    float currentX = 200.f;
+    lastPlatformX = 200.f;
     std::vector<float> occupiedYs;
     occupiedYs.push_back(currentY);
 
@@ -56,11 +67,12 @@ void WorldManager::spawnInitialPlatforms() {
         currentY = nextY;
         occupiedYs.push_back(currentY);
 
-        float nextX = currentX + disXOffset(gen);
-        nextX = std::clamp(nextX, 0.f, 500.f - 100.f);
-        currentX = nextX;
+        float nextX = chooseNextPlatformX(lastPlatformX, gen, 50.f, 500.f - 100.f - 50.f);
+        lastPlatformX = nextX;
 
-        Platform::PlatformType type = getRandomPlatformType(gen);
+        Platform::PlatformType type = choosePlatformType(gen, lastPlatformType);
+        lastPlatformType = type;
+
         sf::Texture &texture = getTextureForType(textureManager, type);
         platforms.push_back(Platform(texture, sf::Vector2f(nextX, currentY), type));
     }
@@ -99,10 +111,7 @@ float WorldManager::update(Player& player, float deltaTime) {
         pPos.y = 400.f;
         player.setPosition(pPos);
 
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> disX(0.f, 400.f);
-        std::uniform_real_distribution<float> disY(70.f, 150.f);
+        std::uniform_real_distribution<float> disY(75.f, 95.f);
 
         float minY = std::numeric_limits<float>::max();
         for (auto& plat : platforms) {
@@ -116,17 +125,21 @@ float WorldManager::update(Player& player, float deltaTime) {
         for (auto& plat : platforms) {
             if (plat.getPosition().y > 800.f) {
                 float newY;
-        do {
-            newY = minY - disY(gen);
-        } while (std::any_of(platforms.begin(), platforms.end(), [&](const Platform &other) {
-            return std::abs(other.getPosition().y - newY) < 60.f;
-        }));
+                do {
+                    newY = minY - disY(gen);
+                } while (std::any_of(platforms.begin(), platforms.end(), [&](const Platform &other) {
+                    return std::abs(other.getPosition().y - newY) < 60.f;
+                }));
 
-        float newX = disX(gen);
-        Platform::PlatformType type = getRandomPlatformType(gen);
-        sf::Texture &texture = getTextureForType(textureManager, type);
-        plat.reset(texture, type, sf::Vector2f(newX, newY));
-        minY = newY;
+                float nextX = chooseNextPlatformX(lastPlatformX, gen, 50.f, 500.f - 100.f - 50.f);
+                lastPlatformX = nextX;
+
+                Platform::PlatformType type = choosePlatformType(gen, lastPlatformType);
+                lastPlatformType = type;
+
+                sf::Texture &texture = getTextureForType(textureManager, type);
+                plat.reset(texture, type, sf::Vector2f(nextX, newY));
+                minY = newY;
             }
         }
     } else {
