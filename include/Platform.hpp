@@ -16,7 +16,9 @@ private:
     sf::Vector2f position;
     PlatformType type;
     bool active;
+    bool falling;
     float moveSpeed;
+    float fallSpeed;
     int moveDirection;
 
 public:

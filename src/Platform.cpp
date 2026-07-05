@@ -1,7 +1,7 @@
 #include "Platform.hpp"
 
 Platform::Platform(sf::Texture& texture, sf::Vector2f pos, PlatformType platformType)
-    : position(pos), type(platformType), active(true), moveSpeed(0.f), moveDirection(1)
+    : position(pos), type(platformType), active(true), falling(false), moveSpeed(0.f), fallSpeed(160.f), moveDirection(1)
 {
     sprite.setTexture(texture);
     sprite.setPosition(position);
@@ -11,23 +11,30 @@ Platform::Platform(sf::Texture& texture, sf::Vector2f pos, PlatformType platform
 }
 
 void Platform::update(float deltaTime, float windowWidth) {
-    if (!active || type != PlatformType::Moving) {
-        return;
+    if (type == PlatformType::Moving && active) {
+        position.x += moveSpeed * static_cast<float>(moveDirection) * deltaTime;
+        if (position.x < 0.f) {
+            position.x = 0.f;
+            moveDirection = 1;
+        } else if (position.x + sprite.getGlobalBounds().width > windowWidth) {
+            position.x = windowWidth - sprite.getGlobalBounds().width;
+            moveDirection = -1;
+        }
     }
 
-    position.x += moveSpeed * static_cast<float>(moveDirection) * deltaTime;
-    if (position.x < 0.f) {
-        position.x = 0.f;
-        moveDirection = 1;
-    } else if (position.x + sprite.getGlobalBounds().width > windowWidth) {
-        position.x = windowWidth - sprite.getGlobalBounds().width;
-        moveDirection = -1;
+    if (falling) {
+        position.y += fallSpeed * deltaTime;
+        if (position.y > 900.f) {
+            active = false;
+            falling = false;
+        }
     }
+
     sprite.setPosition(position);
 }
 
 void Platform::draw(sf::RenderWindow& window) {
-    if (active) {
+    if (active || falling) {
         window.draw(sprite);
     }
 }

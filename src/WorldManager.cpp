@@ -61,7 +61,7 @@ void WorldManager::spawnInitialPlatforms() {
     }
 }
 
-float WorldManager::update(Player& player) {
+float WorldManager::update(Player& player, float deltaTime) {
     if (player.getVelocity().y > 0.f) {
         sf::FloatRect playerBounds = player.getBounds();
         float playerBottom = playerBounds.top + playerBounds.height;
@@ -76,8 +76,9 @@ float WorldManager::update(Player& player) {
                 if (playerBottom < platBounds.top + platBounds.height) {
                     if (plat.getType() == Platform::PlatformType::Broken) {
                         plat.breakPlatform();
+                    } else {
+                        player.jump();
                     }
-                    player.jump();
                     break;
                 }
             }
@@ -104,7 +105,7 @@ float WorldManager::update(Player& player) {
             pos.y += diff;
             plat.setPosition(pos);
             minY = std::min(minY, pos.y);
-            plat.update(diff / 60.f, 500.f);
+            plat.update(deltaTime, 500.f);
         }
 
         for (auto& plat : platforms) {
@@ -125,7 +126,7 @@ float WorldManager::update(Player& player) {
         }
     } else {
         for (auto& plat : platforms) {
-            plat.update(0.f, 500.f);
+            plat.update(deltaTime, 500.f);
         }
     }
 

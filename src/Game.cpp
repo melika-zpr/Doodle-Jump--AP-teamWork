@@ -45,6 +45,7 @@ void Game::run()
 void Game::setupUi()
 {
     const std::vector<std::string> fontPaths = {
+        "fonts/ariblk.ttf",
         "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
         "/Library/Fonts/Arial Unicode.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -207,7 +208,7 @@ void Game::update(float deltaTime)
     }
 
     player->update(deltaTime, 500.f);
-    float scrollAmount = worldManager->update(*player);
+    float scrollAmount = worldManager->update(*player, deltaTime);
     if (scrollAmount > 0.f)
     {
         score += static_cast<int>(scrollAmount);
